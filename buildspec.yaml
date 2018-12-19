@@ -4,7 +4,7 @@ phases:
   install:
     commands:
       - npm install 
-      - aws cloudformation package --template-file api.json  --s3-bucket hemanth8745
+      - aws cloudformation package --template-file api.json  --s3-bucket hemanth99
                                    --output-template-file master.json
 artifacts:
   type: zip
