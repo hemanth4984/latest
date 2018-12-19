@@ -9,6 +9,5 @@ phases:
 artifacts:
   type: zip
   files:
-    - '**/*.js'
-    - '**/*.yml'
-    - '**/*.json'
+    - 'api.json'
+    - 'master.yml'
