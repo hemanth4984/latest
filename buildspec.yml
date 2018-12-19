@@ -1,0 +1,14 @@
+
+version: 0.2
+phases:
+  install:
+    commands:
+      - npm install 
+      - aws cloudformation package --template-file api.json  --s3-bucket hemanth4984
+                                   --output-template-file test.json
+artifacts:
+  type: zip
+  files:
+    - api.json
+    - test.json
+    - index.js
