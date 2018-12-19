@@ -9,12 +9,12 @@
       "Properties": {
         "Code": {
           "S3Bucket" : "hemanth4984",
-		  "S3Key" : "index.zip"
+		  "S3Key" : "app.zip"
         },
         "Description": "A greeting function",
         "FunctionName": "MinfyLambda",
-        "Handler": "index.handler",
-        "Role": "*"
+        "Handler": "app/index.handler",
+        "Role": { "Fn::GetAtt": ["LambdaExecutionRole", "Arn"]},
         "Runtime": "nodejs8.10"
       }
     },
@@ -42,6 +42,22 @@
         "Name" : "PROD"
       }
     },
+
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": { "Service": ["lambda.amazonaws.com"] },
+            "Action": ["sts:AssumeRole"]
+          }]
+        },
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+      }
+    },
+
     "GreetingApi": {
       "Type": "AWS::ApiGateway::RestApi",
       "Properties": {
