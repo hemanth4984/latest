@@ -13,8 +13,7 @@
         },
         "Description": "A greeting function",
         "FunctionName": "MinfyLambda",
-        "Handler": "app/index.handler",
-        "Role": { "Fn::GetAtt": ["LambdaExecutionRole", "Arn"]},
+        "Handler": "index.handler",
         "Runtime": "nodejs8.10"
       }
     },
