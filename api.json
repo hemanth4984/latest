@@ -8,8 +8,8 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket" : { "Fn::GetArtifactAtt" : ["LambdaFunctionSource", "S3Bucket"]},
-		  "S3Key" : { "Fn::GetArtifactAtt" : ["LambdaFunctionSource", "S3Key"]}
+          "S3Bucket" : { "Fn::GetArtifactAtt" : ["BuildArtifact", "S3Bucket"]},
+		  "S3Key" : { "Fn::GetArtifactAtt" : ["BuildArtifact", "S3Key"]}
         },
         "Description": "A greeting function",
         "FunctionName": "MinfyLambda",
