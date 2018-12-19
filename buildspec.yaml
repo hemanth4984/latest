@@ -11,4 +11,3 @@ artifacts:
   files:
     - api.json
     - master.json
-    - index.js
