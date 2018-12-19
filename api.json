@@ -14,7 +14,7 @@
         "Description": "A greeting function",
         "FunctionName": "MinfyLambda",
         "Handler": "index.handler",
-        "Role": { "Fn::GetAtt": ["cft-role", "Arn"]},
+        "Role": "*"
         "Runtime": "nodejs8.10"
       }
     },
