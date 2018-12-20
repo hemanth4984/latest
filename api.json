@@ -8,8 +8,8 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket" : "hemanth4984", //Name of the Bucket Name
-		  "S3Key" : "app.zip" //Name of the Zip file in the Bucket
+          "S3Bucket" : "hemanth4984",
+		  "S3Key" : "app.zip"
         },
         "Description": "A greeting function",
         "FunctionName": "MinfyLambda",
