@@ -1,19 +1,21 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "AWS CloudFormation template that contains a Lambda function behind an API Gateway that has two stages mapped to two Lambda alias",
-
+  "Parameters":{
+      "Bucket" : {"Type" : "String"},
+      "Key" : {"Type" : "String"}
+  },
   "Resources": {
-
-    "GreetingLambda": {
+    "ResourceLambda": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket" : "hemanth4984",
-		  "S3Key" : "app.zip"
+          "S3Bucket" : {"Ref" : "Bucket"},
+		  "S3Key" : {"Ref" : "Key"}
         },
         "Description": "A greeting function",
         "FunctionName": "MinfyLambda",
-        "Handler": "app/index.handler",
+        "Handler": "index.handler",
         "Role": { "Fn::GetAtt": ["LambdaExecutionRole", "Arn"]},
         "Runtime": "nodejs8.10"
       }
@@ -21,23 +23,23 @@
 	"TestingNewFeature" : {
       "Type" : "AWS::Lambda::Version",
       "Properties" : {
-        "FunctionName" : { "Ref" : "GreetingLambda" },
+        "FunctionName" : { "Ref" : "ResourceLambda" },
         "Description" : "A New version of MyFunction"
       }
     },
-    "GreetingLambdaStageAlias": {
+    "ResourceLambdaStageAlias": {
       "Type" : "AWS::Lambda::Alias",
       "Properties" : {
-        "FunctionName" : {"Ref": "GreetingLambda"},
+        "FunctionName" : {"Ref": "ResourceLambda"},
         "FunctionVersion" : "$LATEST",
         "Name" : "DEV"
       }
     },
 
-    "GreetingLambdaProdAlias": {
+    "ResourceLambdaProdAlias": {
       "Type" : "AWS::Lambda::Alias",
       "Properties" : {
-        "FunctionName" : {"Ref": "GreetingLambda"},
+        "FunctionName" : {"Ref": "ResourceLambda"},
         "FunctionVersion" : { "Fn::GetAtt" : [ "TestingNewFeature", "Version" ] },
         "Name" : "PROD"
       }
@@ -58,7 +60,7 @@
       }
     },
 
-    "GreetingApi": {
+    "ResourceApi": {
       "Type": "AWS::ApiGateway::RestApi",
       "Properties": {
         "Name": "MinfyAPI",
@@ -67,26 +69,26 @@
       }
     },
 
-    "GreetingLambdaStagePermission": {
+    "ResourceLambdaStagePermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "Action": "lambda:invokeFunction",
-        "FunctionName": {"Ref": "GreetingLambdaStageAlias"},
+        "FunctionName": {"Ref": "ResourceLambdaStageAlias"},
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {"Fn::Join": ["",
-          ["arn:aws:execute-api:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":", {"Ref": "GreetingApi"}, "/*"]
+          ["arn:aws:execute-api:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":", {"Ref": "ResourceApi"}, "/*"]
         ]}
       }
     },
 
-    "GreetingLambdaProdPermission": {
+    "ResourceLambdaProdPermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "Action": "lambda:invokeFunction",
-        "FunctionName": {"Ref": "GreetingLambdaProdAlias"},
+        "FunctionName": {"Ref": "ResourceLambdaProdAlias"},
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {"Fn::Join": ["",
-          ["arn:aws:execute-api:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":", {"Ref": "GreetingApi"}, "/*"]
+          ["arn:aws:execute-api:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":", {"Ref": "ResourceApi"}, "/*"]
         ]}
       }
     },
@@ -95,22 +97,16 @@
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "Action": "lambda:invokeFunction",
-        "FunctionName": {"Fn::GetAtt": ["GreetingLambda", "Arn"]},
+        "FunctionName": {"Fn::GetAtt": ["ResourceLambda", "Arn"]},
         "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {"Fn::Join": ["", ["arn:aws:execute-api:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":", {"Ref": "GreetingApi"}, "/*"]]}
+        "SourceArn": {"Fn::Join": ["", ["arn:aws:execute-api:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":", {"Ref": "ResourceApi"}, "/*"]]}
       }
     },
-    "GreetingApiStageStage": {
+    "ResourceApiStageStage": {
       "Type": "AWS::ApiGateway::Stage",
       "Properties": {
         "DeploymentId": {"Ref": "ApiDeployment"},
-        "MethodSettings": [{
-          "DataTraceEnabled": true,
-          "HttpMethod": "*",
-          "LoggingLevel": "INFO",
-          "ResourcePath": "/*"
-        }],
-        "RestApiId": {"Ref": "GreetingApi"},
+        "RestApiId": {"Ref": "ResourceApi"},
         "StageName": "DEV",
         "Variables": {
           "LambdaAlias": "DEV"
@@ -118,17 +114,11 @@
       }
     },
 
-    "GreetingApiProdStage": {
+    "ResourceApiProdStage": {
       "Type": "AWS::ApiGateway::Stage",
       "Properties": {
         "DeploymentId": {"Ref": "ApiDeployment"},
-        "MethodSettings": [{
-          "DataTraceEnabled": true,
-          "HttpMethod": "*",
-          "LoggingLevel": "INFO",
-          "ResourcePath": "/*"
-        }],
-        "RestApiId": {"Ref": "GreetingApi"},
+        "RestApiId": {"Ref": "ResourceApi"},
         "StageName": "PROD",
         "Variables": {
           "LambdaAlias": "PROD"
@@ -140,7 +130,7 @@
       "Type": "AWS::ApiGateway::Deployment",
       "DependsOn": ["GreetingRequest"],
       "Properties": {
-        "RestApiId": {"Ref": "GreetingApi"},
+        "RestApiId": {"Ref": "ResourceApi"},
         "StageName": "QA"
       }
     },
@@ -148,9 +138,9 @@
     "GreetingResource": {
       "Type": "AWS::ApiGateway::Resource",
       "Properties": {
-        "RestApiId": {"Ref": "GreetingApi"},
-        "ParentId": {"Fn::GetAtt": ["GreetingApi", "RootResourceId"]},
-        "PathPart": "greeting"
+        "RestApiId": {"Ref": "ResourceApi"},
+        "ParentId": {"Fn::GetAtt": ["ResourceApi", "RootResourceId"]},
+        "PathPart": "Welcome"
       }
     },
 
@@ -164,7 +154,7 @@
           "Type": "AWS",
           "IntegrationHttpMethod": "POST",
           "Uri": {"Fn::Join" : ["",
-            ["arn:aws:apigateway:", {"Ref": "AWS::Region"}, ":lambda:path/2015-03-31/functions/", {"Fn::GetAtt": ["GreetingLambda", "Arn"]}, ":${stageVariables.LambdaAlias}", "/invocations"]
+            ["arn:aws:apigateway:", {"Ref": "AWS::Region"}, ":lambda:path/2015-03-31/functions/", {"Fn::GetAtt": ["ResourceLambda", "Arn"]}, ":${stageVariables.LambdaAlias}", "/invocations"]
           ]},
           "IntegrationResponses": [{
             "StatusCode": 200
@@ -181,7 +171,7 @@
           "method.request.querystring.name": false
         },
         "ResourceId": {"Ref": "GreetingResource"},
-        "RestApiId": {"Ref": "GreetingApi"},
+        "RestApiId": {"Ref": "ResourceApi"},
         "MethodResponses": [{
           "StatusCode": 200
         }]
@@ -193,7 +183,7 @@
     "RootUrl": {
       "Description": "Root URL of the API gateway",
       "Value": {"Fn::Join": ["",
-        ["https://", {"Ref": "GreetingApi"}, ".execute-api.", {"Ref": "AWS::Region"}, ".amazonaws.com"]
+        ["https://", {"Ref": "ResourceApi"}, ".execute-api.", {"Ref": "AWS::Region"}, ".amazonaws.com"]
       ]}
     }
   }
